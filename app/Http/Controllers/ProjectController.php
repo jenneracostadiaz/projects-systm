@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
 {
@@ -20,8 +20,29 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProjectRequest $request)
+    public function store(Request $request)
     {
+
+        $validator = Validator::make($request->all(), [
+            'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'status' => 'required|in:pending,approved,finished,rejected',
+            'client_id' => 'required|exists:clients,id',
+            'budget_id' => 'required|exists:budgets,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ],
+                422
+            );
+        }
+
         $project = new Project($request->input());
         $project->save();
 
@@ -49,8 +70,29 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProjectRequest $request, Project $project)
+    public function update(Request $request, Project $project)
     {
+
+        $validator = Validator::make($request->all(), [
+            'description' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'status' => 'required|in:pending,approved,finished,rejected',
+            'client_id' => 'required|exists:clients,id',
+            'budget_id' => 'required|exists:budgets,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ],
+                422
+            );
+        }
+
         $project->update($request->input());
         return response()->json(
             [

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BudgetRequest;
+use Illuminate\Http\Request;
 use App\Models\Budget;
+use Illuminate\Support\Facades\Validator;
 
 class BudgetController extends Controller
 {
@@ -19,8 +20,26 @@ class BudgetController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(BudgetRequest $request)
+    public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'mount' => 'required|numeric',
+            'description' => 'nullable|string',
+            'status' => 'required|in:pending,approved,rejected',
+            'client_id' => 'required|exists:clients,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ],
+                422
+            );
+        }
+
         $budget = new Budget($request->input());
         $budget->save();
 
@@ -48,8 +67,27 @@ class BudgetController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BudgetRequest $request, Budget $budget)
+    public function update(Request $request, Budget $budget)
     {
+
+        $validator = Validator::make($request->all(), [
+            'mount' => 'required|numeric',
+            'description' => 'nullable|string',
+            'status' => 'required|in:pending,approved,rejected',
+            'client_id' => 'required|exists:clients,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Validation error',
+                    'errors' => $validator->errors()
+                ],
+                422
+            );
+        }
+
         $budget->update($request->input());
         return response()->json(
             [
