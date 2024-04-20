@@ -2,118 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $projects = Project::paginate(10);
-        return response()->json($projects);
+        return $this->getResponse(true, 'Projects retrieved successfully', $projects);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(ProjectRequest $request)
     {
-
-        $validator = Validator::make($request->all(), [
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'status' => 'required|in:pending,approved,finished,rejected',
-            'client_id' => 'required|exists:clients,id',
-            'budget_id' => 'required|exists:budgets,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ],
-                422
-            );
-        }
-
         $project = new Project($request->input());
         $project->save();
-
-        return response()->json(
-            [
-                'status' => true,
-                'message' => 'Project created successfully',
-                'data' => $project
-            ],
-            201
-        );
+        return $this->getResponse(true, 'Project created successfully', $project);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Project $project)
     {
-        return response()->json([
-            'status' => true,
-            'data' => $project
-        ]);
+        return $this->getResponse(true, 'Project retrieved successfully', $project);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Project $project)
+    public function update(ProjectRequest $request, Project $project)
     {
-
-        $validator = Validator::make($request->all(), [
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'status' => 'required|in:pending,approved,finished,rejected',
-            'client_id' => 'required|exists:clients,id',
-            'budget_id' => 'required|exists:budgets,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ],
-                422
-            );
-        }
-
         $project->update($request->input());
-        return response()->json(
-            [
-                'status' => true,
-                'message' => 'Project updated successfully',
-                'data' => $project
-            ]
-        );
+        return $this->getResponse(true, 'Project updated successfully', $project);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Project $project)
     {
         $project->delete();
-        return response()->json(
-            [
-                'status' => true,
-                'message' => 'Project deleted successfully'
-            ]
-        );
+        return $this->getResponse(true, 'Project deleted successfully');
     }
 }

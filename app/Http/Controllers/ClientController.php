@@ -2,114 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ClientRequest;
 use App\Models\Client;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-
-// use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    
     public function index()
     {
-        $clients = Client::all();
-        return response()->json($clients);
+        $clients = Client::paginate(10);
+        return $this->getResponse(true, 'Clients retrieved successfully', $clients);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(ClientRequest $request)
     {
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ],
-                422
-            );
-        }
-
         $client = new Client($request->input());
         $client->save();
-
-        return response()->json(
-            [
-                'status' => true,
-                'message' => 'Client created successfully',
-                'data' => $client
-            ],
-            201
-        );
+        return $this->getResponse(true, 'Client created successfully', $client);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Client $client)
     {
-        return response()->json([
-            'status' => true,
-            'data' => $client
-        ]);
+        return $this->getResponse(true, 'Client retrieved successfully', $client);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Client $client)
+    public function update(ClientRequest $request, Client $client)
     {
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                [
-                    'status' => false,
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ],
-                422
-            );
-        }
-
         $client->update($request->input());
-        return response()->json(
-            [
-                'status' => true,
-                'message' => 'Client updated successfully',
-                'data' => $client
-            ]
-        );
+        return $this->getResponse(true, 'Client updated successfully', $client);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Client $client)
     {
         $client->delete();
-        return response()->json(
-            [
-                'status' => true,
-                'message' => 'Client deleted successfully'
-            ]
-        );
+        return $this->getResponse(true, 'Client deleted successfully');
     }
 }
