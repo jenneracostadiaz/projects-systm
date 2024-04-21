@@ -37,6 +37,9 @@ class AuthController extends Controller
     {
         try{
             $user = User::where('email', $request->email)->first();
+            if(!$user || !Hash::check($request->password, $user->password)){
+                return $this->getResponse(false, 'Invalid credentials');
+            }
             $data = $this->data($user);
             return $this->getResponse(true, 'User logged in successfully', $data);
         } catch (\Throwable $th) {
